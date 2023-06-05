@@ -1,0 +1,42 @@
+syntax = "proto3";
+// import 导入路径应该从 根开始的绝对路径 account/cmd/account/proto/account_req_rsp.proto
+// go_package包名  student 表示生成的go文件的存放地址，会自动生成目录的。 stu表示生成的go文件所属的包名
+// option go_package = "account"; 
+option go_package= "./;account";
+package account;
+import "validate/validate.proto";
+
+// account服务rpc接口
+service Account {
+  // 新增操作记录
+  rpc AddOperation (ReqAddOperation) returns (RspAddOperation) {}
+  // 数据来源
+  rpc GetsPlatform (ReqGetsPlatform) returns (RspGetsPlatform) {}
+}
+
+
+// 新增操作记录req
+message ReqAddOperation {
+  string user_id        = 1 [(validate.rules).string.min_len = 1];        // 用户id
+  int64  module_id      = 3 [(validate.rules).int64 = {gt: 0}];           // 模块id
+  string desc           = 4 [(validate.rules).string.min_len = 1];        // 操作描述
+}
+// 新增操作记录rsp
+message RspAddOperation{}
+
+
+// 数据来源list
+message Platform {
+  int64 id =1;                // 唯一标识
+  string name =2;             // 显示名
+  int32 priority =3;          // 优先级权重(1-100),越高越优先
+  bool sys_preset =4;       //  是否系统预设 true)预设 则 false
+  int64 create_time =5;       // 创建时间
+}
+// 数据来源rep
+message ReqGetsPlatform{}
+// 数据来源rsp
+message RspGetsPlatform {
+  repeated Platform list =1;
+}
+

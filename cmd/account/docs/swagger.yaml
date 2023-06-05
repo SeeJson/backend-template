@@ -1,0 +1,584 @@
+definitions:
+  error.Response:
+    properties:
+      code:
+        description: code 错误码
+        type: integer
+      msg:
+        description: msg 消息
+        type: string
+    type: object
+  error.ResponseWithData:
+    properties:
+      code:
+        description: code 错误码
+        type: integer
+      data:
+        description: 数据信息
+        type: object
+      msg:
+        description: msg 消息
+        type: string
+    type: object
+  handler.ReqAddUser:
+    properties:
+      account:
+        description: 账号
+        type: string
+      department:
+        description: 部门id
+        type: string
+      name:
+        description: 用户名
+        type: string
+      phone:
+        description: 手机号
+        type: string
+      police_number:
+        description: 警号
+        type: string
+      role:
+        description: 角色id
+        type: string
+    required:
+    - account
+    - department
+    - name
+    - role
+    type: object
+  handler.ReqLogin:
+    properties:
+      account:
+        description: 账号
+        type: string
+      captcha_id:
+        description: 验证码ID
+        type: string
+      captcha_result:
+        description: 验证码
+        type: string
+      password:
+        description: 密码
+        type: string
+    required:
+    - account
+    - password
+    type: object
+  handler.ReqUpdateMyPassword:
+    properties:
+      password:
+        description: 新密码
+        type: string
+    required:
+    - password
+    type: object
+  handler.ReqUpdateUser:
+    properties:
+      set:
+        $ref: '#/definitions/service.SetUser'
+        description: 增量修改
+    required:
+    - set
+    type: object
+  handler.RspAddUser:
+    properties:
+      id:
+        description: 用户id
+        type: string
+    type: object
+  handler.RspDeletedUserData:
+    properties:
+      _id:
+        description: 主键（务必设置omitempty，让驱动自动生成）
+        type: string
+      account:
+        description: 登录账号
+        type: string
+      department:
+        description: 部门名
+        type: string
+      name:
+        description: 显示名
+        type: string
+      phone:
+        description: 手机号
+        type: string
+      police_number:
+        description: 警号
+        type: string
+      role:
+        description: 角色名
+        type: string
+      update_time:
+        description: 删除时间-时间戳
+        type: integer
+      updator:
+        description: 删除者姓名
+        type: string
+    type: object
+  handler.RspGenCaptcha:
+    properties:
+      captcha_base64:
+        description: 验证码图片
+        type: string
+      captcha_id:
+        description: 验证码id
+        type: string
+    type: object
+  handler.RspGetDeletedUserList:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/handler.RspDeletedUserData'
+        type: array
+      total:
+        description: 结果集总数
+        type: integer
+    type: object
+  handler.RspGetUserList:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/handler.RspUserData'
+        type: array
+      total:
+        description: 结果集总数
+        type: integer
+      total_deleted:
+        description: 已删除总数
+        type: integer
+    type: object
+  handler.RspGetUserRender:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/handler.RspUserRenderData'
+        type: array
+      total:
+        description: 结果集总数
+        type: integer
+    type: object
+  handler.RspLogin:
+    properties:
+      need_reset:
+        description: 是否需要重设密码
+        type: boolean
+    type: object
+  handler.RspUserData:
+    properties:
+      _id:
+        description: 主键（务必设置omitempty，让驱动自动生成）
+        type: string
+      account:
+        description: 登录账号
+        type: string
+      create_time:
+        description: 创建时间-时间戳
+        type: integer
+      creator:
+        description: 创建者姓名
+        type: string
+      department:
+        description: 部门名
+        type: string
+      name:
+        description: 显示名
+        type: string
+      phone:
+        description: 手机号
+        type: string
+      police_number:
+        description: 警号
+        type: string
+      role:
+        description: 角色名
+        type: string
+      update_time:
+        description: 修改时间-时间戳
+        type: integer
+      updator:
+        description: 修改者姓名
+        type: string
+    type: object
+  handler.RspUserRenderData:
+    properties:
+      _id:
+        description: 主键
+        type: string
+      name:
+        description: 显示名
+        type: string
+    type: object
+  service.SetUser:
+    properties:
+      department:
+        description: 部门id
+        type: string
+      phone:
+        description: 手机号
+        type: string
+      policeNumber:
+        description: 警号
+        type: string
+      role:
+        description: 角色id
+        type: string
+    type: object
+info:
+  contact: {}
+  description: account服务
+  title: Go account API
+  version: "1.0"
+paths:
+  /api/v3/auth/captcha:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/error.ResponseWithData'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.RspGenCaptcha'
+              type: object
+      summary: 获取验证码
+      tags:
+      - 登录相关
+  /api/v3/auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 查询参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.ReqLogin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/error.ResponseWithData'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.RspLogin'
+              type: object
+      summary: 登录
+      tags:
+      - 登录相关
+  /api/v3/user:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.ReqAddUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/error.ResponseWithData'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.RspAddUser'
+              type: object
+      summary: 新增用户
+      tags:
+      - 用户
+  /api/v3/user/:id:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 用户id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/error.Response'
+      summary: 删除用户
+      tags:
+      - 用户
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.ReqUpdateUser'
+      - description: 用户id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/error.Response'
+      summary: 编辑用户
+      tags:
+      - 用户
+  /api/v3/user/:id/password:
+    put:
+      consumes:
+      - application/json
+      description: 超级管理员重置指定用户的密码为默认密码，用户登录时需要重设密码
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 用户id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/error.Response'
+      summary: 超管给用户重置初始密码
+      tags:
+      - 用户
+  /api/v3/user/password:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.ReqUpdateMyPassword'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/error.Response'
+      summary: 修改个人密码
+      tags:
+      - 用户
+  /api/v3/user/phone:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handler.ReqUpdateMyPassword'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/error.Response'
+      summary: 修改个人手机号
+      tags:
+      - 用户
+  /api/v3/users:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 第几页，默认从1开始
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: 每页结果数
+        in: query
+        name: page_size
+        required: true
+        type: integer
+      - description: 筛选条件：用户名（模糊匹配）
+        in: query
+        name: name
+        type: string
+      - description: 筛选条件：部门id
+        in: query
+        name: department
+        type: string
+      - description: 筛选条件：角色id
+        in: query
+        name: role
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/error.ResponseWithData'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.RspGetUserList'
+              type: object
+      summary: 用户列表
+      tags:
+      - 用户
+  /api/v3/users/deleted:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 第几页，默认从1开始
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: 每页结果数
+        in: query
+        name: page_size
+        required: true
+        type: integer
+      - description: 筛选条件：用户名（模糊匹配）
+        in: query
+        name: name
+        type: string
+      - description: 筛选条件：部门id
+        in: query
+        name: department
+        type: string
+      - description: 筛选条件：角色id
+        in: query
+        name: role
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/error.ResponseWithData'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.RspGetDeletedUserList'
+              type: object
+      summary: 已删除用户列表
+      tags:
+      - 用户
+  /api/v3/users/render:
+    get:
+      consumes:
+      - application/json
+      description: 获取简要信息，用于下拉框等场景
+      parameters:
+      - description: Bearer 用户令牌
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: 第几页，默认从1开始
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: 每页结果数
+        in: query
+        name: page_size
+        required: true
+        type: integer
+      - description: 筛选条件：用户名、姓名或警号（模糊匹配）
+        in: query
+        name: name
+        type: string
+      - description: 筛选条件：部门id
+        in: query
+        name: department
+        type: string
+      - description: 筛选条件：角色id
+        in: query
+        name: role
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/error.ResponseWithData'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.RspGetUserRender'
+              type: object
+      summary: 获取用户render列表
+      tags:
+      - 用户
+swagger: "2.0"

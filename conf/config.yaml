@@ -1,0 +1,56 @@
+log_config:
+  log_level: debug
+  # filename: log/log.log
+  # max_size: 100
+  # max_age: 15
+  # max_backups: 15
+  # local_time: yes
+  # compress: no
+  # std: yes
+
+http_config:
+  address: 0.0.0.0:8989
+  # monitor_address: 0.0.0.0:9090
+
+mongo_config:
+  addresses:
+    - 127.0.0.1:27017
+  user: "mongoadmin"
+  password: "secret"
+  database: "account"
+  options: "authMechanism=SCRAM-SHA-1"
+  dial_timeout: 5
+  # expire_after: 2592000 # 30天,单位秒
+
+jwt_config:
+  private_key_path: ../../conf/jwt.key
+  public_key_path: ../../conf/jwt.pub
+  max_age: 12000
+  key_factory: CAC2BD6A6B64459993BD3213CA998652
+  # secret: thisismysignedkeyassupercoolabcd
+  # session_secret: senseradar-secret
+  # session_key: senseradar-token
+
+captcha_config:
+  height: 80
+  width: 200
+  max_skew: 0.7
+  dot_count: 80
+  captcha_len: 4
+
+user_config:
+  min_password_cost: 10
+  min_password_length: 6
+  max_password_length: 18
+  user_default_password: senseradar
+  max_police_number_length: 20
+  max_name_length: 20
+
+redis_config:
+  address: 127.0.0.1:6379
+  password: secret
+  # 最小空闲连接数
+  pool_size: 10
+
+handler_config:
+  default_page_size: 20
